@@ -24,7 +24,13 @@ getFollowers <- function(username)
   return (followers);
 }
 getFollowers("kellya72")
-
+numberOfFollowers <- function(username)
+{
+  followers = getFollowers(username)
+  numberOfFollowers = length(followers)
+  return(numberOfFollowers)
+}
+numberOfFollowers("kellya72")
 getFollowing <- function(username)
 {
   followingList <- GET(paste0("https://api.github.com/users/", username, "/following"), gtoken)
@@ -34,6 +40,13 @@ getFollowing <- function(username)
   return (following);
 }
 getFollowing("kellya72")
+numberFollowing <- function(username)
+{
+  following = getFollowing(username)
+  numberFollowing = length(following)
+  return(numberFollowing)
+}
+numberFollowing("kellya72")
 getCurrentUserFollowers <- function()
 {
   
