@@ -49,8 +49,22 @@ numberFollowing <- function(username)
 numberFollowing("kellya72")
 getCurrentUserFollowers <- function()
 {
-  
+  followersList <- GET(paste0("https://api.github.com/user/followers"), gtoken)
+  json1 = content(followersList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  followers <- githubDF$login
+  return (followers);
 }
+getCurrentUserFollowers()
+getCurrentUserFollowing <- function()
+{
+  followingList <- GET(paste0("https://api.github.com/user/following"), gtoken)
+  json1 = content(followingList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  following <- githubDF$login
+  return (following);
+}
+getCurrentUserFollowing()
 getNumberOfCommits <- function(username){
   
 }
