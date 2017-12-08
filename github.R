@@ -68,6 +68,11 @@ getCurrentUserFollowing()
 getNumberOfCommits <- function(username){
   
 }
-getNumberOfRepositories <- function(username){
-  
+ListOfRepositories <- function(username){
+  repositoriesList = GET(paste0("https://api.github.com/users/", username, "/repos"), gtoken)
+  json1 = content(repositoriesList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  repositories <- githubDF$name
+  return (repositories);
 }
+ListOfRepositories("kellya72")
