@@ -76,3 +76,11 @@ ListOfRepositories <- function(username){
   return (repositories);
 }
 ListOfRepositories("kellya72")
+
+numberOfRepositories <- function(username)
+{
+  repositories = ListOfRepositories(username)
+  number = length(repositories)
+  return(number)
+}
+numberOfRepositories("kellya72")
