@@ -17,12 +17,23 @@ gtoken <- config(token = github_token)
  
 getFollowers <- function(username)
 {
-  
+  followersList <- GET(paste0("https://api.github.com/users/", username, "/followers"), gtoken)
+  json1 = content(followersList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  followers <- githubDF$login
+  return (followers);
 }
+getFollowers("kellya72")
+
 getFollowing <- function(username)
 {
-  
+  followingList <- GET(paste0("https://api.github.com/users/", username, "/following"), gtoken)
+  json1 = content(followingList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  following <- githubDF$login
+  return (following);
 }
+getFollowing("kellya72")
 getCurrentUserFollowers <- function()
 {
   
