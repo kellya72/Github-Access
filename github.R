@@ -122,7 +122,7 @@ get50Organisations <- function(){
   list = githubDF$login
   return(list)
 }
-get50Organisations()
+#get50Organisations()
 
 getListOfReposFromOrg <- function(organisation){
   repos <- GET("https://api.github.com/orgs/",organisation,"/repos",gtoken)
@@ -136,7 +136,19 @@ listOfAllRepos <- function(){
   orgs= get50Organisations()
   #repos= c()
   reposList= c()
+  count=0
   for (i in 1:50){
-    
+    organisation= orgs[i]
+    repos= getListOfReposFromOrg(organisation)
+    numberOfRepos= length(repos)
+    length=count+numberOfRepos
+    while (count<length) {
+      for(i in 1:numberOfRepos){
+        reposList[count]= repos[i]
+        count= count+1
+      }
+    }
   }
+  return(reposList)
 }
+listOfAllRepos()
