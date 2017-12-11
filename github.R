@@ -24,6 +24,7 @@ getFollowers <- function(username)
   return (followers);
 }
 getFollowers("kellya72")
+
 numberOfFollowers <- function(username)
 {
   followers = getFollowers(username)
@@ -31,6 +32,7 @@ numberOfFollowers <- function(username)
   return(numberOfFollowers)
 }
 numberOfFollowers("kellya72")
+
 getFollowing <- function(username)
 {
   followingList <- GET(paste0("https://api.github.com/users/", username, "/following"), gtoken)
@@ -40,6 +42,7 @@ getFollowing <- function(username)
   return (following);
 }
 getFollowing("kellya72")
+
 numberFollowing <- function(username)
 {
   following = getFollowing(username)
@@ -47,6 +50,7 @@ numberFollowing <- function(username)
   return(numberFollowing)
 }
 numberFollowing("kellya72")
+
 getCurrentUserFollowers <- function()
 {
   followersList <- GET(paste0("https://api.github.com/user/followers"), gtoken)
@@ -56,6 +60,7 @@ getCurrentUserFollowers <- function()
   return (followers);
 }
 getCurrentUserFollowers()
+
 getCurrentUserFollowing <- function()
 {
   followingList <- GET(paste0("https://api.github.com/user/following"), gtoken)
@@ -65,9 +70,7 @@ getCurrentUserFollowing <- function()
   return (following);
 }
 getCurrentUserFollowing()
-getNumberOfCommits <- function(username){
-  
-}
+
 ListOfRepositories <- function(username){
   repositoriesList = GET(paste0("https://api.github.com/users/", username, "/repos"), gtoken)
   json1 = content(repositoriesList)
@@ -84,3 +87,56 @@ numberOfRepositories <- function(username)
   return(number)
 }
 numberOfRepositories("kellya72")
+
+getNumberOfCommits <- function(username){
+  repositories=ListOfRepositories(username)
+  count= numberOfRepositories(username)
+  totalNumberOfCommits=0
+  for(i in 1:count){
+    repo = repositories[i]
+    commits = repoCommits(username, repo)
+    numberOfCommits = length(commits)
+    totalNumberOfCommits = totalNumberOfCommits+numberOfCommits
+  }
+  return(totalNumberOfCommits)
+}
+getNumberOfCommits("kellya72")
+
+repoCommits <- function(username, repo){
+  commitsList <- GET(paste0("https://api.github.com/repos/", username,"/", repo, "/commits"),gtoken)
+  json1 = content(commitsList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  commits = githubDF$commit$message
+  return(commits)
+}
+repoCommits("kellya72","Github-Access")
+
+
+
+#############################################
+
+get50Organisations <- function(){
+  orgs <- GET("https://api.github.com/organizations?per_page=50",gtoken)
+  json1 = content(orgs)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  list = githubDF$login
+  return(list)
+}
+get50Organisations()
+
+getListOfReposFromOrg <- function(organisation){
+  repos <- GET("https://api.github.com/orgs/",organisation,"/repos",gtoken)
+  json1 = content(repos)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  reposList = githubDF$login
+  return(reposList)
+}
+
+listOfAllRepos <- function(){
+  orgs= get50Organisations()
+  #repos= c()
+  reposList= c()
+  for (i in 1:50){
+    
+  }
+}
