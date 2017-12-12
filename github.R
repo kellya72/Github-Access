@@ -115,14 +115,14 @@ repoCommits <- function(username, repo){
 
 #############################################
 
-get50Organisations <- function(){
-  orgs <- GET("https://api.github.com/organizations?per_page=50",gtoken)
+get20Organisations <- function(){
+  orgs <- GET("https://api.github.com/organizations?per_page=20",gtoken)
   json1 = content(orgs)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   list = githubDF$login
   return(list)
 }
-get50Organisations()
+#get20Organisations()
 
 getListOfReposFromOrg <- function(org){
   repos <- GET(paste0("https://api.github.com/orgs/",org, "/repos"),gtoken)
@@ -135,7 +135,7 @@ getListOfReposFromOrg <- function(org){
 getListOfReposFromOrg("softa")
 
 listOfAllRepos <- function(){
-  orgs= get50Organisations()
+  orgs= get20Organisations()
   #repos= c()
   reposList= c()
   count=0
@@ -154,3 +154,31 @@ listOfAllRepos <- function(){
   return(reposList)
 }
 listOfAllRepos()
+
+getMembersOfOrg <- function(organisation){
+  members <- GET(paste0("https://api.github.com/orgs/",organisation, "/members"),gtoken)
+  json1 = content(members)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  memberList <- githubDF$login
+  return (memberList);
+}
+getMembersOfOrg("rails")
+
+getAllMembers <- function(){
+  orgs = get20Organisations()
+  allMembers = c()
+  count=0
+  for(i in 1:20){
+    members= getMembersOfOrg(i)
+    noOfNewMembers= length(members)
+    noOfMembers= noOfNewMembers + count
+    while(count<noOfMembers){
+      for(i in 1:noOfNewMembers){
+        allMembers[count]= members[i]
+        count= count+1
+      }
+    }
+  }
+  return(allMembers)
+}
+getAllMembers()
