@@ -169,7 +169,7 @@ getAllMembers <- function(){
   allMembers = c()
   count=0
   for(i in 1:20){
-    members= getMembersOfOrg(i)
+    members= getMembersOfOrg(orgs[i])
     noOfNewMembers= length(members)
     noOfMembers= noOfNewMembers + count
     while(count<noOfMembers){
@@ -182,3 +182,5 @@ getAllMembers <- function(){
   return(allMembers)
 }
 getAllMembers()
+
+checkForDuplicateMembers <- function()
