@@ -8,9 +8,9 @@ library(xml2)
 oauth_endpoints("github")
 
 # Change based on what you 
-myapp <- oauth_app(appname = "kellya72cs3012",
-                   key = "fef796b7cc0c4b14c92b",
-                   secret = "c3a5fd5b70e7e893593997a73705e9e988d993c0")
+myapp <- oauth_app(appname = "cs3012assignment",
+                   key = "6e46618a9337be9df4aa",
+                   secret = "cfa49caf3d66bfa7749efbf3eea32f10b8b99b0b")
 github_token <- oauth2.0_token(oauth_endpoints("github"), myapp)
 
 gtoken <- config(token = github_token)
@@ -23,7 +23,7 @@ getFollowers <- function(username)
   followers <- githubDF$login
   return (followers);
 }
-#getFollowers("kellya72")
+getFollowers("kellya72")
 
 numberOfFollowers <- function(username)
 {
@@ -31,7 +31,7 @@ numberOfFollowers <- function(username)
   numberOfFollowers = length(followers)
   return(numberOfFollowers)
 }
-#numberOfFollowers("kellya72")
+numberOfFollowers("kellya72")
 
 getFollowing <- function(username)
 {
@@ -69,7 +69,7 @@ getCurrentUserFollowing <- function()
   following <- githubDF$login
   return (following);
 }
-#getCurrentUserFollowing()
+getCurrentUserFollowing()
 
 ListOfRepositories <- function(username){
   repositoriesList = GET(paste0("https://api.github.com/users/", username, "/repos"), gtoken)
@@ -79,6 +79,14 @@ ListOfRepositories <- function(username){
   return (repositories);
 }
 #ListOfRepositories("kellya72")
+getCurrentUserListOfRepositories <- function(){
+  repositoriesList = GET(paste0("https://api.github.com/users/repos"), gtoken)
+  json1 = content(repositoriesList)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  repositories <- githubDF$name
+  return (repositories);
+}
+getCurrentUserListOfRepositories()
 
 numberOfRepositories <- function(username)
 {
@@ -111,12 +119,17 @@ repoCommits <- function(username, repo){
 }
 #repoCommits("kellya72","Github-Access")
 
-
+numberOfCommitsInRepo <- function(username, repo){
+  commits= repoCommits(username, repo)
+  number= length(commits)
+  return(number)
+}
+numberOfCommitsInRepo("Kellya72","Github-Access")
 
 #############################################
 
-get20Organisations <- function(){
-  orgs <- GET("https://api.github.com/organizations?per_page=20",gtoken)
+get5Organisations <- function(){
+  orgs <- GET("https://api.github.com/organizations?per_page=5",gtoken)
   json1 = content(orgs)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   list = githubDF$login
@@ -135,7 +148,7 @@ getListOfReposFromOrg <- function(org){
 getListOfReposFromOrg("softa")
 
 listOfAllRepos <- function(){
-  orgs= get20Organisations()
+  orgs= get5Organisations()
   #repos= c()
   reposList= c()
   count=0
@@ -157,6 +170,7 @@ listOfAllRepos()
 
 getMembersOfOrg <- function(organisation){
   members <- GET(paste0("https://api.github.com/orgs/",organisation, "/members"),gtoken)
+ # members <- GET(("https://api.github.com/orgs/rails/members"),gtoken)
   json1 = content(members)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   memberList <- githubDF$login
@@ -165,7 +179,7 @@ getMembersOfOrg <- function(organisation){
 getMembersOfOrg("rails")
 
 getAllMembers <- function(){
-  orgs = get20Organisations()
+  orgs = get5Organisations()
   allMembers = c()
   count=0
   for(i in 1:20){
@@ -183,4 +197,79 @@ getAllMembers <- function(){
 }
 getAllMembers()
 
-checkForDuplicateMembers <- function()
+checkSame <- function(user1, user2){
+  if(user1==user2){
+    return(TRUE)
+  }
+  else{
+    return(FALSE)
+  }
+}
+#checkSame("kellya72","kellya72")
+#checkSame("kellya72","k")
+?rbind
+checkForDuplicateMembers <- function(){
+  membersList= getAllMembers()
+  i=1
+  different= TRUE
+  while(count<length(membersList)){
+    if(checkSame(membersList[i],membersList[i+1])){
+      membersList[i+1]=NULL
+      different=FALSE
+    }
+    i=i+1
+  }
+  return(different)
+}
+checkForDuplicateMembers()
+
+membersOfOrgsTotalCommits <- function(){
+  members= getAllMembers()
+  orgRepos= listOfAllRepos()
+  commits= c()
+  for(i in 1:length(members)){
+    for(j in 1:length(orgRepos)){
+      temp=commits[i]
+      numberOfCommits= numberOfCommitsInRepo(members[i],orgRepos[j])
+      commits[i]= temp + numberOfCommits
+    }
+  }
+  df = data.frame(members,commits)
+  return(df)
+}
+membersOfOrgsTotalCommits()
+
+membersOfOrgsTotalCommits <- function(){
+  members= getAllMembers()
+  commits= c()
+  for(i in 1:length(members)){
+    commits[i]= getNumberOfCommits(members[i])
+  }
+  df= data.frame(members,commits)
+  return(df)
+}
+membersOfOrgsTotalCommits()
+
+
+get50Users <- function(){
+  users = GET("https://api.github.com/users?per_page=5",gtoken)
+  json1 = content(users)
+  githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
+  usersList <- githubDF$login
+  return (usersList);
+}
+get50Users()
+
+allUserRepoNumbers <-function(){
+  users= get50Users()
+  repoNumbers=c()
+  commitNumbers=c()
+  for(i in 1:5){
+    repoNumbers[i]= numberOfRepositories(users[i])
+    commitNumbers[i]= getNumberOfCommits(users[i])
+  }
+  usersList= c(users)
+  df= data.frame(usersList,repoNumbers,commitNumbers)
+  return(df)
+}
+allUserRepoNumbers()
