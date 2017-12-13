@@ -23,7 +23,7 @@ getFollowers <- function(username)
   followers <- githubDF$login
   return (followers);
 }
-getFollowers("kellya72")
+getFollowers("fearoffish")
 
 numberOfFollowers <- function(username)
 {
@@ -31,7 +31,7 @@ numberOfFollowers <- function(username)
   numberOfFollowers = length(followers)
   return(numberOfFollowers)
 }
-numberOfFollowers("kellya72")
+numberOfFollowers("mamut")
 
 getFollowing <- function(username)
 {
@@ -108,7 +108,7 @@ getNumberOfCommits <- function(username){
   }
   return(totalNumberOfCommits)
 }
-#getNumberOfCommits("kellya72")
+getNumberOfCommits("kellya72")
 
 repoCommits <- function(username, repo){
   commitsList <- GET(paste0("https://api.github.com/repos/", username,"/", repo, "/commits"),gtoken)
@@ -128,14 +128,14 @@ numberOfCommitsInRepo("Kellya72","Github-Access")
 
 #############################################
 
-get5Organisations <- function(){
-  orgs <- GET("https://api.github.com/organizations?per_page=5",gtoken)
+get50Organisations <- function(){
+  orgs <- GET("https://api.github.com/organizations?per_page=50",gtoken)
   json1 = content(orgs)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   list = githubDF$login
   return(list)
 }
-#get20Organisations()
+get50Organisations()
 
 getListOfReposFromOrg <- function(org){
   repos <- GET(paste0("https://api.github.com/orgs/",org, "/repos"),gtoken)
@@ -179,10 +179,10 @@ getMembersOfOrg <- function(organisation){
 getMembersOfOrg("rails")
 
 getAllMembers <- function(){
-  orgs = get5Organisations()
+  orgs = get50Organisations()
   allMembers = c()
   count=0
-  for(i in 1:20){
+  for(i in 1:50){
     members= getMembersOfOrg(orgs[i])
     noOfNewMembers= length(members)
     noOfMembers= noOfNewMembers + count
@@ -251,25 +251,27 @@ membersOfOrgsTotalCommits <- function(){
 membersOfOrgsTotalCommits()
 
 
-get50Users <- function(){
-  users = GET("https://api.github.com/users?per_page=5",gtoken)
+get500Users <- function(){
+  users = GET("https://api.github.com/users?per_page=500",gtoken)
   json1 = content(users)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   usersList <- githubDF$login
   return (usersList);
 }
-get50Users()
+get500Users()
 
 allUserRepoNumbers <-function(){
-  users= get50Users()
-  repoNumbers=c()
-  commitNumbers=c()
-  for(i in 1:5){
-    repoNumbers[i]= numberOfRepositories(users[i])
-    commitNumbers[i]= getNumberOfCommits(users[i])
+  users= getAllMembers()
+  noFollowers= c()
+  noCommits= c()
+  for(i in 1:length(users)){
+    noFollowers[i]= numberOfFollowers(users[i])
+    noCommits[i]= getNumberOfCommits(users[i])
   }
-  usersList= c(users)
-  df= data.frame(usersList,repoNumbers,commitNumbers)
+  df = rbind(users,noFollowers,noCommits)
   return(df)
 }
-allUserRepoNumbers()
+userData= allUserRepoNumbers()
+write.csv(userData, file="userData.csv")
+?lapply
+?rbind
