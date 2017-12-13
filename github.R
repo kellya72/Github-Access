@@ -8,22 +8,23 @@ library(xml2)
 oauth_endpoints("github")
 
 # Change based on what you 
-myapp <- oauth_app(appname = "cs3012assignment",
-                   key = "6e46618a9337be9df4aa",
-                   secret = "cfa49caf3d66bfa7749efbf3eea32f10b8b99b0b")
+myapp <- oauth_app(appname = "cs3012assignment5",
+                   key = "5e8c13e2d32096020061",
+                   secret = "dc7a74e4723846ac8cea04d3faeacfd0ebc6d39f")
 github_token <- oauth2.0_token(oauth_endpoints("github"), myapp)
 
 gtoken <- config(token = github_token)
  
 getFollowers <- function(username)
 {
-  followersList <- GET(paste0("https://api.github.com/users/", username, "/followers"), gtoken)
+  followersList <- GET(paste0("https://api.github.com/users/",username, "/followers"), gtoken)
   json1 = content(followersList)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   followers <- githubDF$login
   return (followers);
 }
-getFollowers("fearoffish")
+getFollowers("kellya72")
+
 
 numberOfFollowers <- function(username)
 {
@@ -41,7 +42,7 @@ getFollowing <- function(username)
   following <- githubDF$login
   return (following);
 }
-#getFollowing("kellya72")
+getFollowing("kellya72")
 
 numberFollowing <- function(username)
 {
@@ -267,11 +268,14 @@ allUserRepoNumbers <-function(){
   for(i in 1:length(users)){
     noFollowers[i]= numberOfFollowers(users[i])
     noCommits[i]= getNumberOfCommits(users[i])
-  }
-  df = rbind(users,noFollowers,noCommits)
-  return(df)
-}
-userData= allUserRepoNumbers()
-write.csv(userData, file="userData.csv")
+   }
+   df = rbind(users,noFollowers,noCommits)
+   return(df)
+ }
+> userData= allUserRepoNumbers()
+
+userData
+write.csv(userData,file="userData.csv")
+?write.csv
 ?lapply
 ?rbind
