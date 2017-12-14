@@ -5,34 +5,34 @@ library(httpuv)
 #install.packages("httr")
 library(httr)
 library(xml2)
+
 oauth_endpoints("github")
 
 # Change based on what you 
-myapp <- oauth_app(appname = "cs3012assignment5",
-                   key = "5e8c13e2d32096020061",
-                   secret = "dc7a74e4723846ac8cea04d3faeacfd0ebc6d39f")
+myapp <- oauth_app(appname = "kellya72assignment5",
+                   key = "560ed7ecdc82972fa209",
+                   secret = "f00dbab3f27ef247be30b6393e0f92436b239d3e")
 github_token <- oauth2.0_token(oauth_endpoints("github"), myapp)
 
 gtoken <- config(token = github_token)
- 
+
 getFollowers <- function(username)
 {
-  followersList <- GET(paste0("https://api.github.com/users/",username, "/followers"), gtoken)
+    followersList <- GET(paste0("https://api.github.com/users/",username, "/followers?per_page=200&page="), gtoken)
   json1 = content(followersList)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   followers <- githubDF$login
+  
   return (followers);
 }
-getFollowers("kellya72")
-
-
+getFollowers("bensie")
 numberOfFollowers <- function(username)
 {
   followers = getFollowers(username)
   numberOfFollowers = length(followers)
   return(numberOfFollowers)
 }
-numberOfFollowers("mamut")
+numberOfFollowers("bensie")
 
 getFollowing <- function(username)
 {
@@ -79,7 +79,8 @@ ListOfRepositories <- function(username){
   repositories <- githubDF$name
   return (repositories);
 }
-#ListOfRepositories("kellya72")
+ListOfRepositories("kellya72")
+
 getCurrentUserListOfRepositories <- function(){
   repositoriesList = GET(paste0("https://api.github.com/users/repos"), gtoken)
   json1 = content(repositoriesList)
@@ -129,14 +130,14 @@ numberOfCommitsInRepo("Kellya72","Github-Access")
 
 #############################################
 
-get50Organisations <- function(){
-  orgs <- GET("https://api.github.com/organizations?per_page=50",gtoken)
+get30Organisations <- function(){
+  orgs <- GET("https://api.github.com/organizations?per_page=30",gtoken)
   json1 = content(orgs)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   list = githubDF$login
   return(list)
 }
-get50Organisations()
+get30Organisations()
 
 getListOfReposFromOrg <- function(org){
   repos <- GET(paste0("https://api.github.com/orgs/",org, "/repos"),gtoken)
@@ -180,10 +181,10 @@ getMembersOfOrg <- function(organisation){
 getMembersOfOrg("rails")
 
 getAllMembers <- function(){
-  orgs = get50Organisations()
+  orgs = get30Organisations()
   allMembers = c()
   count=0
-  for(i in 1:50){
+  for(i in 1:30){
     members= getMembersOfOrg(orgs[i])
     noOfNewMembers= length(members)
     noOfMembers= noOfNewMembers + count
@@ -252,16 +253,16 @@ membersOfOrgsTotalCommits <- function(){
 membersOfOrgsTotalCommits()
 
 
-get500Users <- function(){
-  users = GET("https://api.github.com/users?per_page=500",gtoken)
+get100Users <- function(){
+  users = GET("https://api.github.com/users?per_page=100",gtoken)
   json1 = content(users)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   usersList <- githubDF$login
   return (usersList);
 }
-get500Users()
+get100Users()
 
-allUserRepoNumbers <-function(){
+allMemberRepoNumbers <-function(){
   users= getAllMembers()
   noFollowers= c()
   noCommits= c()
@@ -272,10 +273,23 @@ allUserRepoNumbers <-function(){
    df = rbind(users,noFollowers,noCommits)
    return(df)
  }
-> userData= allUserRepoNumbers()
-
+userData= allMemberRepoNumbers()
 userData
 write.csv(userData,file="userData.csv")
+
+allUserRepoNumbers <-function(){
+  users= get100Users()
+  noFollowers= c()
+  noCommits= c()
+  for(i in 1:length(users)){
+    noFollowers[i]= numberOfFollowers(users[i])
+    noCommits[i]= getNumberOfCommits(users[i])
+  }
+  df = rbind(users,noFollowers,noCommits)
+  return(df)
+}
+userDataNotInOrg= allUserRepoNumbers()
+userDataNotInOrg
 ?write.csv
 ?lapply
 ?rbind
