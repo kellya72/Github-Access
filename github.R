@@ -5,6 +5,8 @@ library(httpuv)
 #install.packages("httr")
 library(httr)
 library(xml2)
+library(plotly)
+packageVersion('plotly')
 
 oauth_endpoints("github")
 
@@ -18,14 +20,14 @@ gtoken <- config(token = github_token)
 
 getFollowers <- function(username)
 {
-    followersList <- GET(paste0("https://api.github.com/users/",username, "/followers?per_page=200&page="), gtoken)
+  followersList <- GET(paste0("https://api.github.com/users/", username, "/followers?per_page=100&page="), gtoken)
   json1 = content(followersList)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   followers <- githubDF$login
-  
   return (followers);
 }
-getFollowers("bensie")
+getFollowers("kellya72")
+
 numberOfFollowers <- function(username)
 {
   followers = getFollowers(username)
@@ -50,7 +52,7 @@ numberFollowing <- function(username)
   numberFollowing = length(following)
   return(numberFollowing)
 }
-#numberFollowing("kellya72")
+numberFollowing("kellya72")
 
 getCurrentUserFollowers <- function()
 {
@@ -199,60 +201,6 @@ getAllMembers <- function(){
 }
 getAllMembers()
 
-checkSame <- function(user1, user2){
-  if(user1==user2){
-    return(TRUE)
-  }
-  else{
-    return(FALSE)
-  }
-}
-#checkSame("kellya72","kellya72")
-#checkSame("kellya72","k")
-?rbind
-checkForDuplicateMembers <- function(){
-  membersList= getAllMembers()
-  i=1
-  different= TRUE
-  while(count<length(membersList)){
-    if(checkSame(membersList[i],membersList[i+1])){
-      membersList[i+1]=NULL
-      different=FALSE
-    }
-    i=i+1
-  }
-  return(different)
-}
-checkForDuplicateMembers()
-
-membersOfOrgsTotalCommits <- function(){
-  members= getAllMembers()
-  orgRepos= listOfAllRepos()
-  commits= c()
-  for(i in 1:length(members)){
-    for(j in 1:length(orgRepos)){
-      temp=commits[i]
-      numberOfCommits= numberOfCommitsInRepo(members[i],orgRepos[j])
-      commits[i]= temp + numberOfCommits
-    }
-  }
-  df = data.frame(members,commits)
-  return(df)
-}
-membersOfOrgsTotalCommits()
-
-membersOfOrgsTotalCommits <- function(){
-  members= getAllMembers()
-  commits= c()
-  for(i in 1:length(members)){
-    commits[i]= getNumberOfCommits(members[i])
-  }
-  df= data.frame(members,commits)
-  return(df)
-}
-membersOfOrgsTotalCommits()
-
-
 get100Users <- function(){
   users = GET("https://api.github.com/users?per_page=100",gtoken)
   json1 = content(users)
@@ -260,7 +208,7 @@ get100Users <- function(){
   usersList <- githubDF$login
   return (usersList);
 }
-get100Users()
+get100Users() 
 
 allMemberRepoNumbers <-function(){
   users= getAllMembers()
@@ -270,12 +218,12 @@ allMemberRepoNumbers <-function(){
     noFollowers[i]= numberOfFollowers(users[i])
     noCommits[i]= getNumberOfCommits(users[i])
    }
-   df = rbind(users,noFollowers,noCommits)
+   df = cbind(users,noFollowers,noCommits)
    return(df)
  }
 userData= allMemberRepoNumbers()
 userData
-write.csv(userData,file="userData.csv")
+write.csv(userData,file="memberData.csv")
 
 allUserRepoNumbers <-function(){
   users= get100Users()
@@ -285,11 +233,34 @@ allUserRepoNumbers <-function(){
     noFollowers[i]= numberOfFollowers(users[i])
     noCommits[i]= getNumberOfCommits(users[i])
   }
-  df = rbind(users,noFollowers,noCommits)
+  df = cbind(users,noFollowers,noCommits)
   return(df)
 }
 userDataNotInOrg= allUserRepoNumbers()
 userDataNotInOrg
+write.csv(userData,file="notOrgMembers1.csv")
+
+datadf = as.data.frame(userData)
+scatterPlot <- plot_ly(data = datadf, x = ~noFollowers, y = ~noCommits, text = ~paste("User: ", user,'<br>Commits:', noCommits, '<br>Followers: ', noFollowers)
+             marker = list(size = 2,
+                           color = 'rgba(255, 182, 193, .9)',
+                           line = list(color = 'rgba(152, 0, 0, .8)',
+                                       width = 2))) %>%
+  layout(title = 'Members of Organisation: No of Commits vs No of Followers',
+         yaxis = list(zeroline = FALSE),
+         xaxis = list(zeroline = FALSE))
+scatterPlot
+
+datadfUsers = as.data.frame(userDataNotInOrg)
+scatterPlotUsers <- plot_ly(data = datadfUsers, x = ~noFollowers, y = ~noCommits, text = ~paste("User: ", user,'<br>Commits:', noCommits, '<br>Followers: ', noFollowers)
+                       marker = list(size = 2,
+                                     color = 'rgba(255, 182, 193, .9)',
+                                     line = list(color = 'rgba(152, 0, 0, .8)',
+                                                 width = 2))) %>%
+  layout(title = 'First 100 Users: No of Commits vs No of Followers',
+         yaxis = list(zeroline = FALSE),
+         xaxis = list(zeroline = FALSE))
+scatterPlotUsers
 ?write.csv
 ?lapply
 ?rbind
