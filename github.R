@@ -5,6 +5,7 @@ library(httpuv)
 #install.packages("httr")
 library(httr)
 library(xml2)
+detach(package:plotly, unload=TRUE)
 library(plotly)
 packageVersion('plotly')
 
@@ -75,7 +76,7 @@ getCurrentUserFollowing <- function()
 getCurrentUserFollowing()
 
 ListOfRepositories <- function(username){
-  repositoriesList = GET(paste0("https://api.github.com/users/", username, "/repos"), gtoken)
+  repositoriesList = GET(paste0("https://api.github.com/users/", username, "/repos?per_page=100&page="), gtoken)
   json1 = content(repositoriesList)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   repositories <- githubDF$name
@@ -84,7 +85,7 @@ ListOfRepositories <- function(username){
 ListOfRepositories("kellya72")
 
 getCurrentUserListOfRepositories <- function(){
-  repositoriesList = GET(paste0("https://api.github.com/users/repos"), gtoken)
+  repositoriesList = GET(paste0("https://api.github.com/users/repos?per_page=100&page="), gtoken)
   json1 = content(repositoriesList)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   repositories <- githubDF$name
@@ -131,6 +132,7 @@ numberOfCommitsInRepo <- function(username, repo){
 numberOfCommitsInRepo("Kellya72","Github-Access")
 
 #############################################
+#Assignment 6 #
 
 get30Organisations <- function(){
   orgs <- GET("https://api.github.com/organizations?per_page=30",gtoken)
@@ -142,7 +144,7 @@ get30Organisations <- function(){
 get30Organisations()
 
 getListOfReposFromOrg <- function(org){
-  repos <- GET(paste0("https://api.github.com/orgs/",org, "/repos"),gtoken)
+  repos <- GET(paste0("https://api.github.com/orgs/",org, "/repos?per_page=100"),gtoken)
   json1 = content(repos)
   githubDF = jsonlite::fromJSON(jsonlite::toJSON(json1))
   reposList = githubDF$name
@@ -152,11 +154,11 @@ getListOfReposFromOrg <- function(org){
 getListOfReposFromOrg("softa")
 
 listOfAllRepos <- function(){
-  orgs= get5Organisations()
+  orgs= get3Organisations()
   #repos= c()
   reposList= c()
   count=0
-  for (i in 1:50){
+  for (i in 1:30){
     organisation= orgs[i]
     repos= getListOfReposFromOrg(organisation)
     numberOfRepos= length(repos)
@@ -241,26 +243,43 @@ userDataNotInOrg
 write.csv(userData,file="notOrgMembers1.csv")
 
 datadf = as.data.frame(userData)
-scatterPlot <- plot_ly(data = datadf, x = ~noFollowers, y = ~noCommits, text = ~paste("User: ", user,'<br>Commits:', noCommits, '<br>Followers: ', noFollowers)
-             marker = list(size = 2,
-                           color = 'rgba(255, 182, 193, .9)',
-                           line = list(color = 'rgba(152, 0, 0, .8)',
-                                       width = 2))) %>%
-  layout(title = 'Members of Organisation: No of Commits vs No of Followers',
+library(plotly)
+memberGraph <- plot_ly(data = datadf, x = ~noFollowers, y = ~noCommits, text = ~paste("User: ", users, '<br>Followers:', noFollowers,'<br>Commits:', commits),marker = list(size = 2,
+                                                                                                                                                                            color = 'rgba(255, 182, 193, .9)',
+                                                                                                                                                                            line = list(color = 'rgba(152, 0, 0, .8)',
+                                                                                                                                                                                        width = 2)))%>%
+  layout(title = "Members of Organisation: No of Commits vs No of followers",
          yaxis = list(zeroline = FALSE),
          xaxis = list(zeroline = FALSE))
-scatterPlot
+memberGraph
 
 datadfUsers = as.data.frame(userDataNotInOrg)
-scatterPlotUsers <- plot_ly(data = datadfUsers, x = ~noFollowers, y = ~noCommits, text = ~paste("User: ", user,'<br>Commits:', noCommits, '<br>Followers: ', noFollowers)
-                       marker = list(size = 2,
-                                     color = 'rgba(255, 182, 193, .9)',
-                                     line = list(color = 'rgba(152, 0, 0, .8)',
-                                                 width = 2))) %>%
-  layout(title = 'First 100 Users: No of Commits vs No of Followers',
-         yaxis = list(zeroline = FALSE),
-         xaxis = list(zeroline = FALSE))
-scatterPlotUsers
-?write.csv
-?lapply
-?rbind
+
+
+userGraph<- plot_ly(data = datadfUsers, x = ~noFollowers, y = ~noCommits, text = ~paste("User: ", users, '<br>Followers:', noFollowers,'<br>Commits:', commits), marker = list(size = 2,
+                                                                                                                                                                               color = 'rgba(255, 182, 193, .9)',
+                                                                                                                                                                               line = list(color = 'rgba(152, 0, 0, .8)',
+                                                                                                                                                                                           width = 2)))%>%
+layout(title = "First 100 users: No of Commits vs No of followers",
+       yaxis = list(zeroline = FALSE),
+       xaxis = list(zeroline = FALSE))
+userGraph
+
+allUserRepo <-function(){
+  users= get100Users()
+  noRepos= c()
+  noCommits= c()
+  for(i in 1:length(users)){
+    noRepos[i]= numberOfRepositories(users[i])
+  }
+  df = cbind(users,noRepos)
+  return(df)
+}
+numberRepoPerUser= allUserRepo()
+write.csv(numberRepoPerUser,file="repoNumbers.csv")
+
+repodf = as.data.frame(numberRepoPerUser)
+repoBox <- plot_ly(data= repodf,y = ~noRepos, type = "box")%>%
+layout(title = "Number Of Repositories")
+repoBox
+
